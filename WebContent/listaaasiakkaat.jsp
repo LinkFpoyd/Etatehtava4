@@ -7,9 +7,12 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <title>Insert title here</title>
 <style>
-.oikea{
-	text-align: right;
+
+table {
+border: 1px solid black;
+text-align: left;
 }
+
 </style>
 </head>
 <body>
@@ -19,10 +22,14 @@
 		<tr>
 		<th class="oikea">Hakusana:</th>
 		<th colspan="2"><input type="text" id="hakusana"></th>
-		<th><input type="button" value="hae" id="hakunappi"></th>
+		
+		<th style= "text-align: left;">
+		<input type="button" value="hae" id="hakunappi">
+		</th>
+		
 		</tr>
 		
-		<tr>
+		<tr class="taulu">
 			<th>Asiakasid</th>
 			<th>Etunimi</th>
 			<th>Sukunimi</th>
