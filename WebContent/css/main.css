@@ -1,0 +1,32 @@
+@charset "ISO-8859-1";
+
+table {
+	font-family: Helvetica;
+	border-collapse: collapse;
+	width: 50%;
+}
+
+table td, table th {
+	border: 1px solid black;
+	padding: 7px;
+}
+
+table th {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	text-align: left;
+	background-color: grey;
+	color: blue;
+	
+}
+
+.oikea {
+	border: 1px solid black;
+	text-align: left;
+}
+
+#uusiAsiakas, #takaisin {
+	color: gold;
+	cursor: pointer;
+	
+}

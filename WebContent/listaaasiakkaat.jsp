@@ -5,23 +5,20 @@
 <head>
 <meta charset="ISO-8859-1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="css/main.css">
 <title>Insert title here</title>
-<style>
 
-table {
-border: 1px solid black;
-text-align: left;
-}
-
-</style>
 </head>
 <body>
 <table id="listaus">
 	<thead>
-	
+		<tr>
+			<th colspan="6" class="oikea"><span id="uusiAsiakas">Lisää uusi asiakas</span></th>
+		</tr>
+		
 		<tr>
 		<th class="oikea">Hakusana:</th>
-		<th colspan="2"><input type="text" id="hakusana"></th>
+		<th colspan="4"><input type="text" id="hakusana"></th>
 		
 		<th style= "text-align: left;">
 		<input type="button" value="hae" id="hakunappi">
@@ -35,6 +32,7 @@ text-align: left;
 			<th>Sukunimi</th>
 			<th>Puhelin</th>
 			<th>Sposti</th>
+			<th></th>
 		</tr>
 		</thead>
 		<tbody>
@@ -42,6 +40,10 @@ text-align: left;
 </table>
 <script>
 $ (document).ready(function() {
+	
+	$("#uusiAsiakas").click(function() {
+		document.location="lisaaasiakas.jsp";
+	});
 	
 	haeAsiakkaat();
 	$("#hakunappi").click(function(){
@@ -53,7 +55,7 @@ $ (document).ready(function() {
 			haeAsiakkaat();
 		}
 	});
-	$("#hakusana".focus());
+	$("#hakusana").focus();
 });
 
 function haeAsiakkaat(){
@@ -61,17 +63,33 @@ function haeAsiakkaat(){
 	$.ajax({url:"asiakkaat/"+$("#hakusana").val(), type:"GET", dataType:"json", success:function(result){		
 		$.each(result.asiakkaat, function(i, field){  
         	var htmlStr;
-        	htmlStr+="<tr>";
+        	htmlStr+="<tr id='rivi_"+field.asiakasid+"'>";
         	htmlStr+="<td>"+field.asiakasid+"</td>";
         	htmlStr+="<td>"+field.etunimi+"</td>";
         	htmlStr+="<td>"+field.sukunimi+"</td>";
         	htmlStr+="<td>"+field.puhelin+"</td>";
         	htmlStr+="<td>"+field.sposti+"</td>";  
+        	htmlStr+="<td><span class='poista' onclick=poista('"+field.asiakasid+"')>poista</span></td>";
         	htmlStr+="</tr>";
         	$("#listaus tbody").append(htmlStr);
         });	
     }});
 }
+
+function poista(asiakasid) {
+	if(confirm("Poista asiakas " + asiakasid +"?")) {
+		$.ajax({url:"asiakkaat/"+asiakasid, type:"DELETE", dataType:"json", success:function(result) {
+			if(result.response==0){
+				$("#ilmo").html("Asiakkaan poisto epäonnistui.")
+			} else if(result.response==1){
+				$("#rivi_"+asiakasid).css("background-color", "red");
+				alert("Asiakkaan " + asiakasid + " poisto onnistui.");
+				haeAsiakkaat();
+			}
+		}});
+	}
+}
+
 
 </script>
 
