@@ -40,6 +40,9 @@ public class Asiakkaat extends HttpServlet {
 		} else if (pathInfo.indexOf("haeyksi")!=-1) {
 			String asiakasid = pathInfo.replace("/haeyksi/", "");
 			Asiakas asiakas = dao.etsiAsiakas(asiakasid);
+			if(asiakas==null) {
+				strJSON = "{}";
+			}else {			
 			JSONObject JSON = new JSONObject();
 			JSON.put("asiakasid", asiakas.getAsiakasid());
 			JSON.put("etunimi", asiakas.getEtunimi());
@@ -47,6 +50,7 @@ public class Asiakkaat extends HttpServlet {
 			JSON.put("puhelin", asiakas.getPuhelin());
 			JSON.put("sposti", asiakas.getSposti());
 			strJSON = JSON.toString();
+			}
 		} else {
 			String hakusana = pathInfo.replace("/", "");
 			asiakkaat = dao.listaaKaikki(hakusana);
