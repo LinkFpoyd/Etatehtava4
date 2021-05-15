@@ -4,16 +4,17 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="scripts/main.js"></script>
 <link rel="stylesheet" type="text/css" href="css/main.css">
-<title>Insert title here</title>
+<title>Asiakaslista</title>
 
 </head>
-<body>
+<body onkeydown="tutkiKey(event)">
 <table id="listaus">
 	<thead>
 		<tr>
-			<th colspan="6" class="oikea"><span id="uusiAsiakas">Lisää uusi asiakas</span></th>
+			<th colspan="5" class="oikea"></th>
+			<th><a id="uusiAsiakas" href="lisaaasiakas.jsp">Lisää uusi asiakas</a></th>
 		</tr>
 		
 		<tr>
@@ -35,59 +36,63 @@
 			<th></th>
 		</tr>
 		</thead>
-		<tbody>
+		<tbody id="tbody">
 		</tbody>
 </table>
 <script>
-$ (document).ready(function() {
-	
-	$("#uusiAsiakas").click(function() {
-		document.location="lisaaasiakas.jsp";
-	});
-	
-	haeAsiakkaat();
-	$("#hakunappi").click(function(){
-		console.log($("#hakusana").val());
+haeAsiakkaat();	
+document.getElementById("hakusana").focus(); //viedään kursori hakusana-kenttään sivun latauksen yhteydessä
+
+function tutkiKey(event){
+	if(event.keyCode==13){//Enter
 		haeAsiakkaat();
-	});
-	$(document.body).on("keydown", function(event){
-		if (event.which==13){
-			haeAsiakkaat();
-		}
-	});
-	$("#hakusana").focus();
-});
+	}		
+}
 
 function haeAsiakkaat(){
-	$("#listaus tbody").empty();
-	$.ajax({url:"asiakkaat/"+$("#hakusana").val(), type:"GET", dataType:"json", success:function(result){		
-		$.each(result.asiakkaat, function(i, field){  
-        	var htmlStr;
-        	htmlStr+="<tr id='rivi_"+field.asiakasid+"'>";
-        	htmlStr+="<td>"+field.asiakasid+"</td>";
-        	htmlStr+="<td>"+field.etunimi+"</td>";
-        	htmlStr+="<td>"+field.sukunimi+"</td>";
-        	htmlStr+="<td>"+field.puhelin+"</td>";
-        	htmlStr+="<td>"+field.sposti+"</td>";  
-        	htmlStr+="<td><a href='muutaasiakas.jsp?asiakasid="+field.asiakasid+"'>Muuta</a>&nbsp;";
-        	htmlStr+="<span style='color: red; text-decoration: underline; cursor: pointer' class='poista' onclick=poista('"+field.asiakasid+"')>Poista</span></td>";
-        	htmlStr+="</tr>";
-        	$("#listaus tbody").append(htmlStr);
-        });	
-    }});
+	document.getElementById("tbody").innerHTML = "";
+	fetch("asiakkaat/" + document.getElementById("hakusana").value,{//Lähetetään kutsu backendiin
+	      method: 'GET'
+	    })
+	.then(function (response) {//Odotetaan vastausta ja muutetaan JSON-vastaus objektiksi
+		return response.json()	
+	})
+	.then(function (responseJson) {//Otetaan vastaan objekti responseJson-parametrissä		
+		var asiakkaat = responseJson.asiakkaat;	
+		var htmlStr="";
+		for(var i=0;i<asiakkaat.length;i++){			
+        	htmlStr+="<tr>";
+        	htmlStr+="<td>"+asiakkaat[i].asiakasid+"</td>";
+        	htmlStr+="<td>"+asiakkaat[i].etunimi+"</td>";
+        	htmlStr+="<td>"+asiakkaat[i].sukunimi+"</td>";
+        	htmlStr+="<td>"+asiakkaat[i].puhelin+"</td>";
+        	htmlStr+="<td>"+asiakkaat[i].sposti+"</td>";  
+        	htmlStr+="<td><a href='muutaasiakas.jsp?asiakasid="+asiakkaat[i].asiakasid+"'>Muuta</a>&nbsp;";
+        	htmlStr+="<span class='poista' onclick=poista('"+asiakkaat[i].asiakasid+"')>Poista</span></td>";
+        	htmlStr+="</tr>";        	
+		}
+		document.getElementById("tbody").innerHTML = htmlStr;		
+	})
 }
 
 function poista(asiakasid) {
-	if(confirm("Poista asiakas " + asiakasid +"?")) {
-		$.ajax({url:"asiakkaat/"+asiakasid, type:"DELETE", dataType:"json", success:function(result) {
-			if(result.response==0){
-				$("#ilmo").html("Asiakkaan poisto epäonnistui.")
-			} else if(result.response==1){
-				$("#rivi_"+asiakasid).css("background-color", "red");
-				alert("Asiakkaan " + asiakasid + " poisto onnistui.");
-				haeAsiakkaat();
-			}
-		}});
+	if(confirm("Poista asiakas " + asiakasid +"?")){	
+		fetch("asiakkaat/"+ asiakasid,{//Lähetetään kutsu backendiin
+		      method: 'DELETE'		      	      
+		    })
+		.then(function (response) {//Odotetaan vastausta ja muutetaan JSON-vastaus objektiksi
+			return response.json()
+		})
+		.then(function (responseJson) {//Otetaan vastaan objekti responseJson-parametrissä		
+			var vastaus = responseJson.response;		
+			if(vastaus==0){
+				document.getElementById("ilmo").innerHTML= "Asiakkaan poisto epäonnistui.";
+	        }else if(vastaus==1){	        	
+	        	document.getElementById("ilmo").innerHTML="Asiakkaan " + asiakasid +" poisto onnistui.";
+				haeTiedot();        	
+			}	
+			setTimeout(function(){ document.getElementById("ilmo").innerHTML=""; }, 5000);
+		})		
 	}
 }
 
